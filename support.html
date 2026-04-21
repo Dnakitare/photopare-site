@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Support — PhotoPare</title>
   <meta name="theme-color" content="#1a1412">
+  <link rel="icon" type="image/png" href="icon-180.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -50,7 +51,7 @@
       color: var(--text);
       text-decoration: none;
     }
-    .nav-icon { width: 28px; height: 28px; color: var(--accent); }
+    .nav-icon { width: 28px; height: 28px; border-radius: 6px; }
 
     .content {
       padding: 60px 0 80px;
@@ -118,11 +119,7 @@
 <body>
   <nav>
     <a href="/" class="nav-brand">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M8 12.5c1.5-3 3-4.5 4-4.5s2.5 1.5 4 4.5"/>
-        <line x1="6" y1="15" x2="18" y2="9"/>
-      </svg>
+      <img class="nav-icon" src="icon-180.png" alt="PhotoPare" width="28" height="28">
       PhotoPare
     </a>
   </nav>
