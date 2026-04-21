@@ -4,43 +4,171 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Support — PhotoPare</title>
+  <meta name="theme-color" content="#1a1412">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    body { font-family: -apple-system, system-ui, sans-serif; max-width: 640px; margin: 0 auto; padding: 40px 20px; color: #2c2420; line-height: 1.7; }
-    h1 { font-size: 24px; margin-bottom: 4px; }
-    .app-name { color: #be6437; }
-    h2 { font-size: 18px; margin-top: 28px; }
-    p { margin: 12px 0; }
-    a { color: #be6437; }
-    .faq { margin-top: 32px; }
-    .faq dt { font-weight: 600; margin-top: 20px; }
-    .faq dd { margin: 4px 0 0 0; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #1a1412;
+      --bg-card: #231e1b;
+      --border: rgba(255,255,255,0.06);
+      --text: #f0ebe6;
+      --text-secondary: #a89e95;
+      --text-tertiary: #6e645c;
+      --accent: #c8714a;
+      --serif: 'DM Serif Display', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, system-ui, sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { opacity: 0.8; }
+    .container { max-width: 640px; margin: 0 auto; padding: 0 24px; }
+
+    nav {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      max-width: 960px;
+      margin: 0 auto;
+      padding-left: 24px;
+      padding-right: 24px;
+    }
+    .nav-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--serif);
+      font-size: 20px;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .nav-icon { width: 28px; height: 28px; color: var(--accent); }
+
+    .content {
+      padding: 60px 0 80px;
+    }
+    .content h1 {
+      font-family: var(--serif);
+      font-size: 32px;
+      font-weight: 400;
+      margin-bottom: 8px;
+    }
+    .content > p {
+      color: var(--text-secondary);
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    .contact-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin: 24px 0 48px;
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+    .contact-card a {
+      font-weight: 500;
+    }
+
+    .faq h2 {
+      font-family: var(--serif);
+      font-size: 24px;
+      font-weight: 400;
+      margin-bottom: 24px;
+    }
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0;
+    }
+    .faq-item:first-of-type {
+      border-top: 1px solid var(--border);
+    }
+    .faq-item dt {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
+    .faq-item dd {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    footer {
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+    .footer-copy {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
   </style>
 </head>
 <body>
-  <h1><span class="app-name">PhotoPare</span> Support</h1>
+  <nav>
+    <a href="/" class="nav-brand">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M8 12.5c1.5-3 3-4.5 4-4.5s2.5 1.5 4 4.5"/>
+        <line x1="6" y1="15" x2="18" y2="9"/>
+      </svg>
+      PhotoPare
+    </a>
+  </nav>
 
-  <h2>Contact</h2>
-  <p>For bug reports, feature requests, or any questions: <a href="mailto:support@photopare.app">support@photopare.app</a></p>
+  <div class="container content">
+    <h1>Support</h1>
+    <p>Bug reports, feature requests, or questions — we're here to help.</p>
 
-  <div class="faq">
-    <h2>FAQ</h2>
+    <div class="contact-card">
+      Reach us at <a href="mailto:support@photopare.app">support@photopare.app</a>
+    </div>
 
-    <dl>
-      <dt>Is it safe to delete photos?</dt>
-      <dd>Yes. Deleted photos go to Recently Deleted in the Photos app and are recoverable for 30 days. PhotoPare never permanently deletes anything.</dd>
+    <div class="faq">
+      <h2>Frequently asked questions</h2>
 
-      <dt>Does PhotoPare upload my photos?</dt>
-      <dd>No. All scanning and analysis happens entirely on your device. Nothing leaves your phone.</dd>
+      <dl>
+        <div class="faq-item">
+          <dt>Is it safe to delete photos?</dt>
+          <dd>Yes. Deleted photos go to Recently Deleted in the Photos app and are recoverable for 30 days. PhotoPare never permanently deletes anything.</dd>
+        </div>
 
-      <dt>What's included for free?</dt>
-      <dd>Scanning your entire library and reviewing results is completely free. The one-time $4.99 unlock enables deletion.</dd>
+        <div class="faq-item">
+          <dt>Does PhotoPare upload my photos?</dt>
+          <dd>No. All scanning and analysis happens entirely on your device. Nothing leaves your phone.</dd>
+        </div>
 
-      <dt>Can I restore my purchase on a new device?</dt>
-      <dd>Yes. Tap "Restore previous purchase" on the unlock screen. Your purchase is tied to your Apple ID.</dd>
+        <div class="faq-item">
+          <dt>What's included for free?</dt>
+          <dd>Scanning your entire library and reviewing results is completely free. The one-time $4.99 unlock enables deletion.</dd>
+        </div>
 
-      <dt>What photo formats are supported?</dt>
-      <dd>HEIC, JPEG, PNG, and other formats supported by iOS. HEIC photos are decoded natively using Apple's ImageIO framework.</dd>
-    </dl>
+        <div class="faq-item">
+          <dt>Can I restore my purchase on a new device?</dt>
+          <dd>Yes. Tap "Restore previous purchase" on the unlock screen. Your purchase is tied to your Apple ID.</dd>
+        </div>
+
+        <div class="faq-item">
+          <dt>What photo formats are supported?</dt>
+          <dd>HEIC, JPEG, PNG, and other formats supported by iOS. HEIC photos are decoded natively using Apple's ImageIO framework.</dd>
+        </div>
+      </dl>
+    </div>
   </div>
+
+  <footer>
+    <span class="footer-copy">&copy; 2026 PhotoPare</span>
+  </footer>
 </body>
 </html>

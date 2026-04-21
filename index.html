@@ -4,22 +4,622 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PhotoPare — Clean up your photo library</title>
+  <meta name="description" content="Find duplicates, blurry shots, and forgotten screenshots. Runs entirely on your device. No uploads, no cloud, no tracking.">
+  <meta name="theme-color" content="#1a1412">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    body { font-family: -apple-system, system-ui, sans-serif; max-width: 640px; margin: 0 auto; padding: 40px 20px; color: #2c2420; line-height: 1.7; text-align: center; }
-    h1 { font-size: 28px; margin-bottom: 8px; }
-    .app-name { color: #be6437; }
-    .tagline { font-size: 18px; color: #666; margin-bottom: 32px; }
-    .links { margin-top: 40px; }
-    .links a { color: #be6437; margin: 0 16px; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #1a1412;
+      --bg-card: #231e1b;
+      --bg-card-hover: #2a2421;
+      --border: rgba(255,255,255,0.06);
+      --text: #f0ebe6;
+      --text-secondary: #a89e95;
+      --text-tertiary: #6e645c;
+      --accent: #c8714a;
+      --accent-soft: rgba(200,113,74,0.1);
+      --accent-glow: rgba(200,113,74,0.25);
+      --serif: 'DM Serif Display', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ---- Noise texture overlay ---- */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    a { color: var(--accent); text-decoration: none; transition: opacity 0.2s; }
+    a:hover { opacity: 0.8; }
+
+    /* ---- Layout ---- */
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+    /* ---- Nav ---- */
+    nav {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--serif);
+      font-size: 20px;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .nav-brand:hover { opacity: 1; }
+    .nav-icon {
+      width: 28px;
+      height: 28px;
+      color: var(--accent);
+    }
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      letter-spacing: 0.01em;
+    }
+    .nav-links a:hover { color: var(--text); opacity: 1; }
+
+    /* ---- Hero ---- */
+    .hero {
+      padding: 72px 0 64px;
+      text-align: center;
+      position: relative;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 400px;
+      background: radial-gradient(ellipse, var(--accent-glow) 0%, transparent 70%);
+      pointer-events: none;
+      opacity: 0.4;
+    }
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: clamp(40px, 7vw, 64px);
+      font-weight: 400;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .hero h1 em {
+      color: var(--accent);
+      font-style: italic;
+    }
+    .hero-sub {
+      font-size: 18px;
+      color: var(--text-secondary);
+      max-width: 460px;
+      margin: 0 auto 40px;
+      line-height: 1.7;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px 6px 10px;
+      background: var(--accent-soft);
+      border: 1px solid rgba(200,113,74,0.15);
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--accent);
+      margin-bottom: 32px;
+      letter-spacing: 0.02em;
+    }
+    .hero-badge svg { flex-shrink: 0; }
+
+    .app-store-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 32px;
+      background: var(--text);
+      color: var(--bg);
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+    }
+    .app-store-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+      opacity: 1;
+    }
+    .app-store-btn:active { transform: translateY(0); }
+    .app-store-btn svg { width: 22px; height: 22px; }
+
+    /* ---- Features ---- */
+    .features {
+      padding: 80px 0;
+    }
+    .features-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .features-header h2 {
+      font-family: var(--serif);
+      font-size: 32px;
+      font-weight: 400;
+      margin-bottom: 12px;
+    }
+    .features-header p {
+      color: var(--text-secondary);
+      font-size: 16px;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 680px) {
+      .feature-grid { grid-template-columns: 1fr; }
+    }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 24px;
+      transition: background 0.25s, border-color 0.25s, transform 0.25s;
+    }
+    .feature-card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(255,255,255,0.1);
+      transform: translateY(-3px);
+    }
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .feature-icon.dup { background: rgba(200,113,74,0.1); color: var(--accent); }
+    .feature-icon.blur { background: rgba(168,158,149,0.1); color: var(--text-secondary); }
+    .feature-icon.screen { background: rgba(110,100,92,0.1); color: var(--text-tertiary); }
+    .feature-card h3 {
+      font-family: var(--serif);
+      font-size: 20px;
+      font-weight: 400;
+      margin-bottom: 8px;
+    }
+    .feature-card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ---- How it works ---- */
+    .how {
+      padding: 80px 0;
+      border-top: 1px solid var(--border);
+    }
+    .how-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .how-header h2 {
+      font-family: var(--serif);
+      font-size: 32px;
+      font-weight: 400;
+      margin-bottom: 12px;
+    }
+    .how-header p {
+      color: var(--text-secondary);
+      font-size: 16px;
+    }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      counter-reset: step;
+    }
+    @media (max-width: 680px) {
+      .steps { grid-template-columns: 1fr; gap: 24px; }
+    }
+    .step {
+      text-align: center;
+      counter-increment: step;
+    }
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid rgba(200,113,74,0.3);
+      color: var(--accent);
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      font-variant-numeric: tabular-nums;
+    }
+    .step h3 {
+      font-family: var(--serif);
+      font-size: 18px;
+      font-weight: 400;
+      margin-bottom: 8px;
+    }
+    .step p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ---- Privacy strip ---- */
+    .privacy-strip {
+      padding: 56px 0;
+      border-top: 1px solid var(--border);
+    }
+    .privacy-inner {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    @media (max-width: 600px) {
+      .privacy-inner { flex-direction: column; text-align: center; gap: 20px; }
+    }
+    .privacy-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: rgba(74,124,89,0.08);
+      color: #5a9b6b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .privacy-text h3 {
+      font-family: var(--serif);
+      font-size: 20px;
+      font-weight: 400;
+      margin-bottom: 6px;
+    }
+    .privacy-text p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ---- Pricing ---- */
+    .pricing {
+      padding: 80px 0;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+    .pricing h2 {
+      font-family: var(--serif);
+      font-size: 32px;
+      font-weight: 400;
+      margin-bottom: 12px;
+    }
+    .pricing > p {
+      color: var(--text-secondary);
+      font-size: 16px;
+      margin-bottom: 40px;
+    }
+    .price-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 32px;
+      max-width: 380px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .price-card::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 21px;
+      background: linear-gradient(135deg, rgba(200,113,74,0.2), transparent 60%);
+      z-index: -1;
+      pointer-events: none;
+    }
+    .price-free {
+      font-size: 14px;
+      font-weight: 600;
+      color: #5a9b6b;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+    .price-card h3 {
+      font-family: var(--serif);
+      font-size: 22px;
+      font-weight: 400;
+      margin-bottom: 16px;
+    }
+    .price-list {
+      list-style: none;
+      text-align: left;
+      margin-bottom: 24px;
+    }
+    .price-list li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .price-list li:last-child { border-bottom: none; }
+    .price-list svg { flex-shrink: 0; color: #5a9b6b; }
+    .price-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0;
+    }
+    .price-unlock {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    .price-amount {
+      font-family: var(--serif);
+      font-size: 36px;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .price-once {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    /* ---- Footer ---- */
+    footer {
+      padding: 40px 0;
+      border-top: 1px solid var(--border);
+    }
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    @media (max-width: 480px) {
+      .footer-inner { flex-direction: column; gap: 16px; }
+    }
+    .footer-copy {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+    .footer-links a {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .footer-links a:hover { color: var(--text); opacity: 1; }
+
+    /* ---- Animations ---- */
+    @media (prefers-reduced-motion: no-preference) {
+      .fade-up {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+      }
+      .fade-up.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .fade-up.d1 { transition-delay: 0.08s; }
+      .fade-up.d2 { transition-delay: 0.16s; }
+      .fade-up.d3 { transition-delay: 0.24s; }
+      .fade-up.d4 { transition-delay: 0.32s; }
+      .fade-up.d5 { transition-delay: 0.4s; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .fade-up { opacity: 1; transform: none; }
+    }
   </style>
 </head>
 <body>
-  <h1><span class="app-name">PhotoPare</span></h1>
-  <p class="tagline">Clean up your photo library. Keep your memories.</p>
-  <p>Find duplicates, blurry shots, and forgotten screenshots. Runs entirely on your device.</p>
-  <div class="links">
-    <a href="privacy.html">Privacy Policy</a>
-    <a href="support.html">Support</a>
-  </div>
+
+  <!-- Nav -->
+  <nav>
+    <div class="container nav-inner">
+      <a href="/" class="nav-brand">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M8 12.5c1.5-3 3-4.5 4-4.5s2.5 1.5 4 4.5"/>
+          <line x1="6" y1="15" x2="18" y2="9"/>
+        </svg>
+        PhotoPare
+      </a>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="support.html">Support</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge fade-up">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
+        100% on-device
+      </div>
+      <h1 class="fade-up d1">Tidy up your<br><em>photo library</em></h1>
+      <p class="hero-sub fade-up d2">Find duplicates, blurry shots, and forgotten screenshots. Keep what matters, reclaim your storage.</p>
+      <a href="https://apps.apple.com/app/photopare/id6744257938" class="app-store-btn fade-up d3">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        Download on the App Store
+      </a>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="features-header fade-up">
+        <h2>What it finds</h2>
+        <p>Three scans, one tap. Your library, analyzed in minutes.</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-card fade-up d1">
+          <div class="feature-icon dup">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="8" y="2" width="13" height="13" rx="2"/><path d="M4 9a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2"/></svg>
+          </div>
+          <h3>Duplicates</h3>
+          <p>Exact copies and near-identical shots. PhotoPare suggests which to keep based on quality, so you don't have to compare pixel by pixel.</p>
+        </div>
+        <div class="feature-card fade-up d2">
+          <div class="feature-icon blur">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>
+          </div>
+          <h3>Blurry photos</h3>
+          <p>Accidental shutter presses, shaky hands, poor focus. Found automatically so you can decide what stays and what goes.</p>
+        </div>
+        <div class="feature-card fade-up d3">
+          <div class="feature-icon screen">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          </div>
+          <h3>Screenshots</h3>
+          <p>Old receipts, directions you already followed, memes you forgot about. Clean them out in bulk.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="how">
+    <div class="container">
+      <div class="how-header fade-up">
+        <h2>How it works</h2>
+        <p>No accounts, no uploads, no setup.</p>
+      </div>
+      <div class="steps">
+        <div class="step fade-up d1">
+          <div class="step-num">1</div>
+          <h3>Scan</h3>
+          <p>Tap scan and PhotoPare analyzes your entire library on-device. Even large libraries finish in minutes.</p>
+        </div>
+        <div class="step fade-up d2">
+          <div class="step-num">2</div>
+          <h3>Review</h3>
+          <p>Browse findings by category. Each group shows the best photo to keep and suggests which to remove.</p>
+        </div>
+        <div class="step fade-up d3">
+          <div class="step-num">3</div>
+          <h3>Clean up</h3>
+          <p>Confirm and delete. Photos go to Recently Deleted and are recoverable for 30 days.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Privacy -->
+  <section class="privacy-strip">
+    <div class="container">
+      <div class="privacy-inner fade-up">
+        <div class="privacy-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="privacy-text">
+          <h3>Your photos never leave your device</h3>
+          <p>No cloud uploads, no analytics, no tracking SDKs. PhotoPare processes everything locally using Apple's native frameworks. Your library is yours alone.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="pricing" id="pricing">
+    <h2 class="fade-up">Simple pricing</h2>
+    <p class="fade-up d1">Scan for free. Unlock deletion once, forever.</p>
+    <div class="price-card fade-up d2">
+      <div class="price-free">Free to scan</div>
+      <h3>Find everything first</h3>
+      <ul class="price-list">
+        <li>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Full library scan
+        </li>
+        <li>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Review duplicates, blurry, screenshots
+        </li>
+        <li>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          See exactly how much space to reclaim
+        </li>
+      </ul>
+      <div class="price-divider"></div>
+      <p class="price-unlock">Unlock deletion</p>
+      <p class="price-amount">$4.99</p>
+      <p class="price-once">One-time purchase. No subscription.</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container footer-inner">
+      <span class="footer-copy">&copy; 2026 PhotoPare</span>
+      <ul class="footer-links">
+        <li><a href="privacy.html">Privacy</a></li>
+        <li><a href="support.html">Support</a></li>
+        <li><a href="mailto:support@photopare.app">Contact</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+    }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+  </script>
 </body>
 </html>
